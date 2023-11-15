@@ -293,6 +293,8 @@ class ManagedModule(QtCore.QObject):
         self._remote_port = cfg.get('port', None)
         self._remote_certfile = cfg.get('certfile', None)
         self._remote_keyfile = cfg.get('keyfile', None)
+        self._remote_cacerts = cfg.get('cacerts', None)
+        
         if any(attr is None for attr in [self._remote_module_name, self._remote_address, self._remote_port]):
             self._remote_url = None
         else:
@@ -371,6 +373,11 @@ class ManagedModule(QtCore.QObject):
     @property
     def remote_key_path(self):
         return self._remote_keyfile
+
+    
+    @property
+    def remote_cacerts_path(self):
+        return self._remote_cacerts
 
     @property
     def remote_cert_path(self):
@@ -681,7 +688,8 @@ class ManagedModule(QtCore.QObject):
                     try:
                         self._instance = get_remote_module_instance(self.remote_url,
                                                                     certfile=self._remote_certfile,
-                                                                    keyfile=self._remote_keyfile)
+                                                                    keyfile=self._remote_keyfile,
+                                                                    cacerts=self._remote_cacerts)
                     except BaseException as e:
                         self._instance = None
                         raise RuntimeError(f'Error during initialization of remote '

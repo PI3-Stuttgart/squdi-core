@@ -69,6 +69,10 @@ def config_schema() -> Dict[str, Any]:
                             'keyfile': {
                                 'type': ['null', 'string'],
                                 'default': None
+                            },
+                            'cacerts': {
+                                'type': ['null', 'string'],
+                                'default': None
                             }
                         }
                     },
@@ -212,6 +216,10 @@ def remote_module_config_schema() -> Dict[str, Any]:
             'keyfile': {
                 'type': ['null', 'string'],
                 'default': None
-            }
+            },
+            'cacerts': {
+                'type': ['null', 'string'],
+                'default': None
+            }   
         }
     }

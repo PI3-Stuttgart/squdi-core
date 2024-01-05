@@ -93,7 +93,7 @@ class _ServerRunnable(QtCore.QObject):
         else:
             self.protocol_config = protocol_config
         self.ssl_version = ssl.PROTOCOL_TLSv1_2 if ssl_version is None else ssl_version
-        self.cert_reqs = ssl.CERT_REQUIRED if cert_reqs is None else cert_reqs
+        self.cert_reqs = None #ssl.CERT_REQUIRED if cert_reqs is None else cert_reqs
         self.ciphers = 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH' if ciphers is None else ciphers
 
     @QtCore.Slot()

@@ -83,12 +83,14 @@ class DictTableModel(QtCore.QAbstractTableModel):
         """ Get a dict key by index number """
         with self._lock:
             it = iter(self._storage)
+            key = None
             try:
-                for _ in range(n+1):
+                for i in range(n):
                     key = next(it)
             except StopIteration:
-                raise IndexError(f'Index {n:d} out of bounds for table model with '
-                                 f'{len(self._storage):d} rows') from None
+                pass
+            if key is None:
+                raise IndexError
             return key
 
     def get_index_by_key(self, key: Any) -> int:

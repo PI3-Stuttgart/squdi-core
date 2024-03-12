@@ -35,7 +35,7 @@ from qudi.core.services import RemoteModulesService, QudiNamespaceService
 logger = get_logger(__name__)
 
 
-def get_remote_module_instance(remote_url, certfile=None, keyfile=None, protocol_config=None):
+def get_remote_module_instance(remote_url, certfile=None, keyfile=None, cacerts=None, protocol_config=None):
     """ Helper method to retrieve a remote module instance via rpyc from a qudi RemoteModuleServer.
 
     @param str remote_url: The URL of the remote qudi module
@@ -57,7 +57,8 @@ def get_remote_module_instance(remote_url, certfile=None, keyfile=None, protocol
                                       port=parsed.port,
                                       config=protocol_config,
                                       certfile=certfile,
-                                      keyfile=keyfile)
+                                      keyfile=keyfile,
+                                      ca_certs=cacerts)
     else:
         connection = rpyc.connect(host=parsed.hostname,
                                   port=parsed.port,
@@ -71,7 +72,7 @@ class _ServerRunnable(QtCore.QObject):
     RPyC servers.
     """
 
-    def __init__(self, service, host, port, certfile=None, keyfile=None, protocol_config=None,
+    def __init__(self, service, host, port, certfile=None, keyfile=None, cacerts=None, protocol_config=None,
                  ssl_version=None, cert_reqs=None, ciphers=None):
         super().__init__()
 
@@ -82,6 +83,7 @@ class _ServerRunnable(QtCore.QObject):
         self.port = port
         self.certfile = certfile
         self.keyfile = keyfile
+        self.cacerts = cacerts
         if protocol_config is None:
             self.protocol_config = {'allow_all_attrs': True,
                                     'allow_setattr': True,
@@ -91,7 +93,7 @@ class _ServerRunnable(QtCore.QObject):
         else:
             self.protocol_config = protocol_config
         self.ssl_version = ssl.PROTOCOL_TLSv1_2 if ssl_version is None else ssl_version
-        self.cert_reqs = ssl.CERT_REQUIRED if cert_reqs is None else cert_reqs
+        self.cert_reqs = None #ssl.CERT_REQUIRED if cert_reqs is None else cert_reqs
         self.ciphers = 'EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH' if ciphers is None else ciphers
 
     @QtCore.Slot()
@@ -101,6 +103,7 @@ class _ServerRunnable(QtCore.QObject):
         if self.certfile is not None and self.keyfile is not None:
             authenticator = SSLAuthenticator(certfile=self.certfile,
                                              keyfile=self.keyfile,
+                                             ca_certs = self.cacerts,
                                              cert_reqs=self.cert_reqs,
                                              ssl_version=self.ssl_version,
                                              ciphers=self.ciphers)
@@ -146,7 +149,7 @@ class BaseServer(QtCore.QObject):
     """
 
     def __init__(self, qudi, service_instance, name, host, port, certfile=None,
-                 keyfile=None, protocol_config=None, ssl_version=None, cert_reqs=None,
+                 keyfile=None, cacerts=None, protocol_config=None, ssl_version=None, cert_reqs=None,
                  ciphers=None, parent=None):
         """
         @param int port: port the RPyC server should listen to
@@ -163,6 +166,7 @@ class BaseServer(QtCore.QObject):
                                        port=port,
                                        certfile=certfile,
                                        keyfile=keyfile,
+                                       cacerts=cacerts,
                                        protocol_config=protocol_config,
                                        ssl_version=ssl_version,
                                        cert_reqs=cert_reqs,

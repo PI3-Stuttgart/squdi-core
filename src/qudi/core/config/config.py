@@ -229,7 +229,8 @@ class Configuration(_FileHandlerBase,
                           address: str,
                           port: int,
                           certfile: Optional[str] = None,
-                          keyfile: Optional[str] = None) -> None:
+                          keyfile: Optional[str] = None,
+                          cacerts: Optional[str] = None) -> None:
         """ Mutates the current configuration by validating and adding a new remote qudi module
         config with base "gui", "logic" or "hardware" of the form:
             <name>:
@@ -238,6 +239,7 @@ class Configuration(_FileHandlerBase,
                 port: <port>
                 certfile: <certfile>
                 keyfile: <keyfile>
+                cacerts: <cacerts>
 
         Raises KeyError if a module with the same name is already configured.
         """
@@ -251,6 +253,8 @@ class Configuration(_FileHandlerBase,
             module_config['certfile'] = certfile
         if keyfile is not None:
             module_config['keyfile'] = keyfile
+        if cacerts is not None:
+            module_config['cacerts'] = cacerts
         _validate_remote_module_config(module_config)
         new_config = self.config_map
         new_config[base][name] = module_config

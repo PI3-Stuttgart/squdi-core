@@ -372,6 +372,7 @@ class _FitConfigurationItemDelegate(QtWidgets.QStyledItemDelegate):
 
     def createEditor(self, parent, option, index):
         if index.isValid():
+            print('createEditor:', index.row())
             editor = _FitConfigPanel(parent=parent, fit_config=index.data(QtCore.Qt.DisplayRole))
             editor.setGeometry(option.rect)
             editor.sigConfigurationRemovedClicked.connect(self.parent().remove_config_clicked)
@@ -383,6 +384,7 @@ class _FitConfigurationItemDelegate(QtWidgets.QStyledItemDelegate):
             editor.update_fit_config(index.data(QtCore.Qt.DisplayRole))
 
     def setModelData(self, editor, model, index):
+        print('setModelData:', index.row())
         data = (editor.estimator, editor.custom_parameters)
         model.setData(index, data)
 
@@ -404,6 +406,7 @@ class _FitConfigurationItemDelegate(QtWidgets.QStyledItemDelegate):
         painter.restore()
 
     def destroyEditor(self, editor, index):
+        print('destroyEditor:', index.row())
         editor.sigConfigurationRemovedClicked.disconnect()
         self.setModelData(editor, index.model(), index)
         return super().destroyEditor(editor, index)

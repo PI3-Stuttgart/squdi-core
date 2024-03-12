@@ -20,7 +20,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 If not, see <https://www.gnu.org/licenses/>.
 """
 
-__all__ = ['g2_three_level_system', 'Autocorrelation']
+__all__ = ['g2_bg_corrected', 'Autocorrelation']
 
 import numpy as np
 from typing import Sequence
@@ -32,7 +32,9 @@ def g2_three_level_system(x, offset, center, gamma_1, gamma_2, beta):
     #https://arxiv.org/ftp/arxiv/papers/1708/1708.04523.pdf page 18
     return offset + (1 - (1 + beta) * np.exp( - np.abs(x - center) * gamma_1) + beta * np.exp( - np.abs(x - center) * gamma_2))
 
-
+def g2_bg_corrected(t, offset, center, gamma_1, gamma_2, beta, signal, total_intenisty):
+    original_g2 = g2_three_level_system(t, offset, center, gamma_1, gamma_2, beta)  # Use the original g2_i function
+    return 1 + ((signal**2) / (total_intenisty**2)) * (original_g2 - 1)
 
 class Autocorrelation(FitModelBase):
     """
@@ -45,10 +47,12 @@ class Autocorrelation(FitModelBase):
         self.set_param_hint('gamma_1', value=0, min=-np.inf, max=np.inf)
         self.set_param_hint('gamma_2', value=0, min=0., max=np.inf)
         self.set_param_hint('beta', value=0., min=0., max=np.inf)
+        self.set_param_hint('signal', value=1., min=1., max=np.inf)
+        self.set_param_hint('total_intensity', value=1., min=1., max=np.inf)
 
     @staticmethod
-    def _model_function(x, offset, center, gamma_1, gamma_2, beta):
-        return g2_three_level_system(x, offset, center, gamma_1, gamma_2, beta)
+    def _model_function(x, offset, center, gamma_1, gamma_2, beta, signal, total_intenisty):
+        return g2_bg_corrected(x, offset, center, gamma_1, gamma_2, beta, signal, total_intenisty)
 
     @estimator('default')
     def estimate_peak(self, data, x):

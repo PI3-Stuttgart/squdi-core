@@ -22,6 +22,7 @@ If not, see <https://www.gnu.org/licenses/>.
 __all__ = ['Connector']
 
 import weakref
+import inspect
 from typing import Any, Type, Union
 from qudi.util.overload import OverloadProxy
 
@@ -86,7 +87,13 @@ class Connector:
         """ Check if target is connectible by this connector and connect.
         """
         bases = {cls.__name__ for cls in target.__class__.mro()}
-        if self.interface not in bases:
+
+        #checking for remote
+        #FIX IT
+        parent_classes = inspect.getmro(type(target))
+        bases_remote = {cls.__name__ for cls in parent_classes}
+
+        if (self.interface not in bases) and ("BaseNetref" not in bases_remote):
             raise RuntimeError(
                 f'Module "{target}" connected to connector "{self.name}" does not implement '
                 f'interface "{self.interface}".'

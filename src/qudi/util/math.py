@@ -32,17 +32,17 @@ from scipy import signal
 #     MM=1000000  # choose a big number
 #     print(sum(signal.hanning(MM))/MM)
 ft_windows = {'none': {'func': np.ones, 'ampl_norm': 1.0},
-              'hamming': {'func': signal.hamming, 'ampl_norm': 1.0/0.54},
-              'hann': {'func': signal.hann, 'ampl_norm': 1.0/0.5},
-              'blackman': {'func': signal.blackman, 'ampl_norm': 1.0/0.42},
-              'triang': {'func': signal.triang, 'ampl_norm': 1.0/0.5},
-              'flattop': {'func': signal.flattop, 'ampl_norm': 1.0/0.2156},
-              'bartlett': {'func': signal.bartlett, 'ampl_norm': 1.0/0.5},
-              'parzen': {'func': signal.parzen, 'ampl_norm': 1.0/0.375},
-              'bohman': {'func': signal.bohman, 'ampl_norm': 1.0/0.4052847},
-              'blackmanharris': {'func': signal.blackmanharris, 'ampl_norm': 1.0/0.35875},
-              'nuttall': {'func': signal.nuttall, 'ampl_norm': 1.0/0.3635819},
-              'barthann': {'func': signal.barthann, 'ampl_norm': 1.0/0.5}
+              'hamming': {'func': signal.windows.hamming, 'ampl_norm': 1.0/0.54},
+              'hann': {'func': signal.windows.hann, 'ampl_norm': 1.0/0.5},
+              'blackman': {'func': signal.windows.blackman, 'ampl_norm': 1.0/0.42},
+              'triang': {'func': signal.windows.triang, 'ampl_norm': 1.0/0.5},
+              'flattop': {'func': signal.windows.flattop, 'ampl_norm': 1.0/0.2156},
+              'bartlett': {'func': signal.windows.bartlett, 'ampl_norm': 1.0/0.5},
+              'parzen': {'func': signal.windows.parzen, 'ampl_norm': 1.0/0.375},
+              'bohman': {'func': signal.windows.bohman, 'ampl_norm': 1.0/0.4052847},
+              'blackmanharris': {'func': signal.windows.blackmanharris, 'ampl_norm': 1.0/0.35875},
+              'nuttall': {'func': signal.windows.nuttall, 'ampl_norm': 1.0/0.3635819},
+              'barthann': {'func': signal.windows.barthann, 'ampl_norm': 1.0/0.5}
               }
 
 

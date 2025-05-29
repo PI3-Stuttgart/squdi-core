@@ -34,6 +34,12 @@ from qudi.util.network import netobtain
 from qudi.core.logger import get_logger
 
 logger = get_logger(__name__)
+# at the top of the file
+from functools import wraps, WRAPPER_ASSIGNMENTS
+
+# build a WRAPPER_ASSIGNMENTS tuple that excludes '__annotations__'
+NO_ANN = tuple(name for name in WRAPPER_ASSIGNMENTS if name != "__annotations__")
+
 
 
 class _SharedModulesModel(DictTableModel):
@@ -233,26 +239,32 @@ class ModuleRpycProxy:
     def __init__(self, obj):
         object.__setattr__(self, '_obj_ref', weakref.ref(obj))
 
-     def __getattribute__(self, name):
-         obj = object.__getattribute__(self, '_obj_ref')()
-         attr = getattr(obj, name)
-         if not name.startswith('__') and (ismethod(attr) or isfunction(attr)):
-             sig = signature(attr)
-             if len(sig.parameters) > 0:
-                # ensure annotations is a dict
+    def __getattribute__(self, name):
+        obj = object.__getattribute__(self, '_obj_ref')()
+        attr = getattr(obj, name)
+        # only wrap real methods, not dunder or data attributes
+        if (not name.startswith('__')) and (ismethod(attr) or isfunction(attr)):
+            sig = signature(attr)
+            if len(sig.parameters) > 0:
+
+                # ensure attr.__annotations__ is a dict
                 if not isinstance(getattr(attr, '__annotations__', None), dict):
-                        attr.__annotations__ = {}
+                    attr.__annotations__ = {}
 
-                 @wraps(attr)
-                 def wrapped(*args, **kwargs):
-                     sig.bind(*args, **kwargs)
-                     args = [netobtain(arg) for arg in args]
-                     kwargs = {n: netobtain(v) for n, v in kwargs.items()}
-                     return attr(*args, **kwargs)
+                # now wrap, but *do not* copy annotations
+                @wraps(attr, assigned=NO_ANN)
+                def wrapped(*args, **kwargs):
+                    sig.bind(*args, **kwargs)
+                    args = [netobtain(a) for a in args]
+                    kwargs = {k: netobtain(v) for k, v in kwargs.items()}
+                    return attr(*args, **kwargs)
 
-                 wrapped.__signature__ = sig
-                 return wrapped
-         return attr
+                # preserve the signature for introspection/binding
+                wrapped.__signature__ = sig
+                return wrapped
+
+        # fallback: return the raw attribute
+        return attr
 
     def __delattr__(self, name):
         obj = object.__getattribute__(self, '_obj_ref')()

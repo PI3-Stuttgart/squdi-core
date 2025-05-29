@@ -233,24 +233,26 @@ class ModuleRpycProxy:
     def __init__(self, obj):
         object.__setattr__(self, '_obj_ref', weakref.ref(obj))
 
-    # proxying (special cases)
-    def __getattribute__(self, name):
-        obj = object.__getattribute__(self, '_obj_ref')()
-        attr = getattr(obj, name)
-        if not name.startswith('__') and ismethod(attr) or isfunction(attr):
-            sig = signature(attr)
-            if len(sig.parameters) > 0:
+     def __getattribute__(self, name):
+         obj = object.__getattribute__(self, '_obj_ref')()
+         attr = getattr(obj, name)
+         if not name.startswith('__') and (ismethod(attr) or isfunction(attr)):
+             sig = signature(attr)
+             if len(sig.parameters) > 0:
+                # ensure annotations is a dict
+                if not isinstance(getattr(attr, '__annotations__', None), dict):
+                        attr.__annotations__ = {}
 
-                @wraps(attr)
-                def wrapped(*args, **kwargs):
-                    sig.bind(*args, **kwargs)
-                    args = [netobtain(arg) for arg in args]
-                    kwargs = {name: netobtain(arg) for name, arg in kwargs.items()}
-                    return attr(*args, **kwargs)
+                 @wraps(attr)
+                 def wrapped(*args, **kwargs):
+                     sig.bind(*args, **kwargs)
+                     args = [netobtain(arg) for arg in args]
+                     kwargs = {n: netobtain(v) for n, v in kwargs.items()}
+                     return attr(*args, **kwargs)
 
-                wrapped.__signature__ = sig
-                return wrapped
-        return attr
+                 wrapped.__signature__ = sig
+                 return wrapped
+         return attr
 
     def __delattr__(self, name):
         obj = object.__getattribute__(self, '_obj_ref')()
